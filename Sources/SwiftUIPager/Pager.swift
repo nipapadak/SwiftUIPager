@@ -110,7 +110,7 @@ public struct Pager<Element, ID, PageView>: View  where PageView: View, Element:
     @State var size: CGSize = .zero
 
     /// Translation on the X-Axis
-    @State var draggingOffset: CGFloat = 0
+     @Binding var draggingOffset: CGFloat
 
     /// The moment when the dragging gesture started
     @State var draggingStartTime: Date! = nil
@@ -128,8 +128,9 @@ public struct Pager<Element, ID, PageView>: View  where PageView: View, Element:
     /// - Parameter data: Array of items to populate the content
     /// - Parameter id: KeyPath to identifiable property
     /// - Parameter content: Factory method to build new pages
-    public init(page: Binding<Int>, data: [Element], id: KeyPath<Element, ID>, @ViewBuilder content: @escaping (Element) -> PageView) {
+    public init(page: Binding<Int>, draggingOffset: Binding<CGFloat>, data: [Element], id: KeyPath<Element, ID>, @ViewBuilder content: @escaping (Element) -> PageView) {
         self._pageIndex = page
+        self._draggingOffset = draggingOffset
         self.data = data
         self.id = id
         self.content = content
@@ -169,8 +170,9 @@ extension Pager where ID == Element.ID, Element : Identifiable {
     ///
     /// - Parameter data: Array of items to populate the content
     /// - Parameter content: Factory method to build new pages
-    public init(page: Binding<Int>, data: [Element], @ViewBuilder content: @escaping (Element) -> PageView) {
+    public init(page: Binding<Int>, draggingOffset: Binding<CGFloat>, data: [Element], @ViewBuilder content: @escaping (Element) -> PageView) {
         self._pageIndex = page
+        self._draggingOffset = draggingOffset
         self.data = data
         self.id = \Element.id
         self.content = content
