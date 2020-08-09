@@ -138,14 +138,17 @@ extension Pager {
             }
         }
 
+        var pageChangeDraggingVelocity: Double
+
         /// Initializes a new `Pager`.
         ///
         /// - Parameter page: Binding to the page index
         /// - Parameter data: Array of items to populate the content
         /// - Parameter id: KeyPath to identifiable property
         /// - Parameter content: Factory method to build new pages
-        init(size: CGSize, page: Binding<Int>, data: [Element], id: KeyPath<Element, ID>, @ViewBuilder content: @escaping (Element) -> PageView) {
+        init(size: CGSize, velocity: Double = 50, page: Binding<Int>, data: [Element], id: KeyPath<Element, ID>, @ViewBuilder content: @escaping (Element) -> PageView) {
             self.size = size
+            self.pageChangeDraggingVelocity = velocity
             self._pageIndex = page
             self.data = data.map { PageWrapper(batchId: 1, keyPath: id, element: $0) }
             self.id = \PageWrapper<Element, ID>.id
@@ -274,7 +277,7 @@ extension Pager.PagerContent {
 
         guard allowsMultiplePagination else {
             var newPage = currentPage
-            if currentPage == self.page, abs(velocity) > 500 {
+            if currentPage == self.page, abs(velocity) > pageChangeDraggingVelocity {
                 if isInifinitePager {
                     newPage = (newPage + Int(velocity / abs(velocity)) + self.numberOfPages) % self.numberOfPages
                 } else {
@@ -288,7 +291,7 @@ extension Pager.PagerContent {
 
         let side = self.isHorizontal ? self.size.width : self.size.height
         let maxIncrement = Int((Double(numberOfPages) * 0.25).rounded(.up))
-        let velocityPageIncrement = Int(CGFloat(abs(velocity)) / (side / self.pageDistance) / 500)
+        let velocityPageIncrement = Int(CGFloat(abs(velocity)) / (side / self.pageDistance) / CGFloat(pageChangeDraggingVelocity))
 
         var offsetPageIncrement = self.direction == .forward ? currentPage - self.page : self.page - currentPage
         if self.isInifinitePager {
